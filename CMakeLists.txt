@@ -66,20 +66,20 @@ set(CPP_SOURCE_FILES
 )
 
 # If we want to give the option to build a static library, set BUILD_SHARED_LIBS option to OFF
-add_library(NodeEditor ${CPP_SOURCE_FILES} ${RESOURCES})
-add_library(NodeEditor::NodeEditor ALIAS NodeEditor)
+add_library(RadiumNodeEditor ${CPP_SOURCE_FILES} ${RESOURCES})
+add_library(RadiumNodeEditor::RadiumNodeEditor ALIAS RadiumNodeEditor)
 
 target_include_directories(
-    NodeEditor
+    RadiumNodeEditor
     PUBLIC $<INSTALL_INTERFACE:include> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/nodes/internal>
 )
 
-target_link_libraries(NodeEditor PUBLIC Qt::Core Qt::Widgets Qt::Gui Qt::OpenGL)
+target_link_libraries(RadiumNodeEditor PUBLIC Qt::Core Qt::Widgets Qt::Gui Qt::OpenGL)
 
 target_compile_definitions(
-    NodeEditor
+    RadiumNodeEditor
     PUBLIC ${QtWidgets_DEFINITIONS} NODE_EDITOR_SHARED
     PRIVATE NODE_EDITOR_EXPORTS
             # NODE_DEBUG_DRAWING
@@ -87,15 +87,15 @@ target_compile_definitions(
 )
 
 target_compile_options(
-    NodeEditor PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4 /wd4127 /EHsc> $<$<CXX_COMPILER_ID:GNU>:-Wall
+    RadiumNodeEditor PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4 /wd4127 /EHsc> $<$<CXX_COMPILER_ID:GNU>:-Wall
                        -Wextra> $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra>
 )
 
-target_compile_features(NodeEditor PUBLIC cxx_generic_lambdas # Require C++14
+target_compile_features(RadiumNodeEditor PUBLIC cxx_generic_lambdas # Require C++14
 )
 
 set_target_properties(
-    NodeEditor
+    RadiumNodeEditor
     PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib LIBRARY_OUTPUT_DIRECTORY
                                                                 ${CMAKE_BINARY_DIR}/lib
                RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
@@ -108,12 +108,12 @@ set_target_properties(
 file(GLOB_RECURSE HEADERS_TO_MOC include/nodes/internal/*.hpp)
 
 qt_wrap_cpp(
-    nodes_moc ${HEADERS_TO_MOC} TARGET NodeEditor OPTIONS --no-notes # Don't display a note for the
+    nodes_moc ${HEADERS_TO_MOC} TARGET RadiumNodeEditor OPTIONS --no-notes # Don't display a note for the
                                                                      # headers which don't produce a
                                                                      # moc_*.cpp
 )
 
-target_sources(NodeEditor PRIVATE ${nodes_moc})
+target_sources(RadiumNodeEditor PRIVATE ${nodes_moc})
 
 # ##################################################################################################
 # Installation
@@ -123,25 +123,25 @@ include(GNUInstallDirs)
 
 set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/RadiumNodeEditor)
 
-install(TARGETS NodeEditor EXPORT NodeEditorTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+install(TARGETS RadiumNodeEditor EXPORT RadiumNodeEditorTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(EXPORT NodeEditorTargets FILE NodeEditorTargets.cmake NAMESPACE NodeEditor::
+install(EXPORT RadiumNodeEditorTargets FILE RadiumNodeEditorTargets.cmake NAMESPACE RadiumNodeEditor::
         DESTINATION ${INSTALL_CONFIGDIR}
 )
 
-export(TARGETS NodeEditor NAMESPACE NodeEditor:: FILE NodeEditorTargets.cmake)
+export(TARGETS RadiumNodeEditor NAMESPACE RadiumNodeEditor:: FILE RadiumNodeEditorTargets.cmake)
 
 include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_LIST_DIR}/cmake/NodeEditorConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/NodeEditorConfig.cmake INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/RadiumNodeEditorConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/RadiumNodeEditorConfig.cmake INSTALL_DESTINATION ${INSTALL_CONFIGDIR}
 )
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/NodeEditorConfig.cmake DESTINATION ${INSTALL_CONFIGDIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/RadiumNodeEditorConfig.cmake DESTINATION ${INSTALL_CONFIGDIR})
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/QtFunctions.cmake DESTINATION ${INSTALL_CONFIGDIR})
