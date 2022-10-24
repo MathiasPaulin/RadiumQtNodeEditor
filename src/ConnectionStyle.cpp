@@ -1,6 +1,7 @@
 #include "ConnectionStyle.hpp"
 
 #include <iostream>
+#include <random>
 
 #include <QtCore/QFile>
 #include <QtCore/QJsonArray>
@@ -136,10 +137,11 @@ QColor ConnectionStyle::normalColor( QString typeId ) const {
 
     std::size_t const hue_range = 0xFF;
 
-    std::srand( hash );
-    std::size_t hue = std::rand() % hue_range;
+    std::mt19937 gen(static_cast<unsigned int>(hash));
+    std::uniform_int_distribution<int> distrib(0, hue_range);
 
-    std::size_t sat = 120 + hash % 129;
+    int hue = distrib(gen);
+    int sat = 120 + hash % 129;
 
     return QColor::fromHsl( hue, sat, 160 );
 }

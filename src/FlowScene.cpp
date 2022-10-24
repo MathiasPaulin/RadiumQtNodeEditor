@@ -38,7 +38,7 @@ using QtNodes::PortType;
 using QtNodes::TypeConverter;
 
 FlowScene::FlowScene( std::shared_ptr<DataModelRegistry> registry, QObject* parent ) :
-    QGraphicsScene( parent ), _registry( std::move( registry ) ) {
+    QGraphicsScene( parent ), _registry( registry ) {
     setItemIndexMethod( QGraphicsScene::NoIndex );
 
     // This connection should come first
