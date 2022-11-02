@@ -110,22 +110,37 @@ void FlowView::contextMenuEvent( QContextMenuEvent* event ) {
 
     modelMenu.addAction( treeViewAction );
 
-    QMap<QString, QTreeWidgetItem*> topLevelItems;
-    for ( auto const& cat : _scene->registry().categories() ) {
-        auto item = new QTreeWidgetItem( treeView );
-        item->setText( 0, cat );
-        item->setData( 0, Qt::UserRole, skipText );
-        topLevelItems[cat] = item;
+
+
+    const auto& categories = _scene->registry().categories();
+
+    QMap<QString, QMap<QString, QTreeWidgetItem*>> factoriesCategories;
+    for ( auto const& fac : categories ) {
+        auto facItem = new QTreeWidgetItem( treeView );
+        facItem->setText( 0, fac.first );
+        facItem->setData( 0, Qt::UserRole, skipText );
+        for ( auto const& cat : fac.second ) {
+            auto item = new QTreeWidgetItem( facItem );
+            item->setText( 0, cat );
+            item->setData( 0, Qt::UserRole, skipText );
+            factoriesCategories[fac.first][cat] = item;
+        }
     }
 
     for ( auto const& assoc : _scene->registry().registeredModelsCategoryAssociation() ) {
-        auto parent = topLevelItems[assoc.second];
+        auto parent = factoriesCategories[assoc.second.first][assoc.second.second];
         auto item   = new QTreeWidgetItem( parent );
         item->setText( 0, assoc.first );
         item->setData( 0, Qt::UserRole, assoc.first );
     }
 
-    treeView->expandAll();
+    auto cbScroll = [treeView](const QModelIndex&) {
+                    treeView->resizeColumnToContents(0);
+                };
+    connect(treeView, &QTreeWidget::expanded, cbScroll);
+    connect(treeView, &QTreeWidget::collapsed, cbScroll);
+
+    //treeView->expandAll();
 
     connect( treeView, &QTreeWidget::itemClicked, [&]( QTreeWidgetItem* item, int ) {
         QString modelName = item->data( 0, Qt::UserRole ).toString();
@@ -154,12 +169,14 @@ void FlowView::contextMenuEvent( QContextMenuEvent* event ) {
 
     // Setup filtering
     connect( txtBox, &QLineEdit::textChanged, [&]( const QString& text ) {
-        for ( auto& topLvlItem : topLevelItems ) {
-            for ( int i = 0; i < topLvlItem->childCount(); ++i ) {
-                auto child       = topLvlItem->child( i );
-                auto modelName   = child->data( 0, Qt::UserRole ).toString();
-                const bool match = ( modelName.contains( text, Qt::CaseInsensitive ) );
-                child->setHidden( !match );
+        for ( auto& topLvlItem : factoriesCategories ) {
+            for( auto& cat : topLvlItem) {
+                for ( int i = 0; i < cat->childCount(); ++i ) {
+                    auto child       = cat->child( i );
+                    auto modelName   = child->data( 0, Qt::UserRole ).toString();
+                    const bool match = ( modelName.contains( text, Qt::CaseInsensitive ) );
+                    child->setHidden( !match );
+                }
             }
         }
     } );

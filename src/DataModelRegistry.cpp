@@ -26,7 +26,8 @@ DataModelRegistry::registeredModelsCategoryAssociation() const {
     return _registeredModelsCategory;
 }
 
-DataModelRegistry::CategoriesSet const& DataModelRegistry::categories() const {
+//DataModelRegistry::CategoriesSet const& DataModelRegistry::categories() const {
+DataModelRegistry::RegisteredNodeFactories const& DataModelRegistry::categories() const {
     return _categories;
 }
 

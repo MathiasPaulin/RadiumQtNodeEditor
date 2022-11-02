@@ -30,8 +30,9 @@ class NODE_EDITOR_PUBLIC DataModelRegistry
     using RegistryItemPtr             = std::unique_ptr<NodeDataModel>;
     using RegistryItemCreator         = std::function<RegistryItemPtr()>;
     using RegisteredModelCreatorsMap  = std::unordered_map<QString, RegistryItemCreator>;
-    using RegisteredModelsCategoryMap = std::unordered_map<QString, QString>;
+    using RegisteredModelsCategoryMap = std::unordered_map<QString, std::pair<QString, QString>>;
     using CategoriesSet               = std::set<QString>;
+    using RegisteredNodeFactories     = std::unordered_map<QString, CategoriesSet>;
 
     using RegisteredTypeConvertersMap = std::map<TypeConverterId, TypeConverter>;
 
@@ -48,11 +49,11 @@ class NODE_EDITOR_PUBLIC DataModelRegistry
     // ---
     /* Added for Radium */
     void
-    registerModel( QString const& typeName, RegistryItemCreator creator, QString const& category ) {
+    registerModel( QString const& typeName, RegistryItemCreator creator, QString const& nodeFactory, QString const& category ) {
         if ( !_registeredItemCreators.count( typeName ) ) {
             _registeredItemCreators[typeName] = std::move( creator );
-            _categories.insert( category );
-            _registeredModelsCategory[typeName] = category;
+            _categories[nodeFactory].insert( category );
+            _registeredModelsCategory[typeName] = {nodeFactory, category};
         }
     }
     // ---
@@ -61,8 +62,8 @@ class NODE_EDITOR_PUBLIC DataModelRegistry
         const QString name = computeName<ModelType>( HasStaticMethodName<ModelType> {}, creator );
         if ( !_registeredItemCreators.count( name ) ) {
             _registeredItemCreators[name] = std::move( creator );
-            _categories.insert( category );
-            _registeredModelsCategory[name] = category;
+            _categories["Default"].insert( category );
+            _registeredModelsCategory[name] = {"Default", category};;
         }
     }
 
@@ -98,14 +99,17 @@ class NODE_EDITOR_PUBLIC DataModelRegistry
 
     RegisteredModelsCategoryMap const& registeredModelsCategoryAssociation() const;
 
-    CategoriesSet const& categories() const;
+    //CategoriesSet const& categories() const;
+
+    RegisteredNodeFactories const& categories() const;
 
     TypeConverter getTypeConverter( NodeDataType const& d1, NodeDataType const& d2 ) const;
 
   private:
     RegisteredModelsCategoryMap _registeredModelsCategory;
 
-    CategoriesSet _categories;
+    //CategoriesSet _categories;
+    RegisteredNodeFactories _categories;
 
     RegisteredModelCreatorsMap _registeredItemCreators;
 
